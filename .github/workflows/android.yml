@@ -1,4 +1,4 @@
-name: Build Sami Android APK
+name: Build AmanGuard Family (Web & Android APKs)
 
 on:
   push:
@@ -15,14 +15,14 @@ on:
   workflow_dispatch:
     inputs:
       create_release:
-        description: 'Publish as GitHub Release for direct public download'
+        description: 'Publish APKs as GitHub Release'
         required: false
         type: boolean
         default: true
       release_tag:
-        description: 'Release Tag (e.g. v1.3.0)'
+        description: 'Release Tag (e.g. v1.2.0)'
         required: false
-        default: 'v1.3.0'
+        default: 'v1.2.0'
 
 permissions:
   contents: write
@@ -30,16 +30,14 @@ permissions:
   packages: write
 
 jobs:
-  build-android-apk:
-    name: Build & Package Sami Android APK
+  build-web:
+    name: Build AmanGuard Web Dashboard
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 15
 
     steps:
       - name: 1. Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
       - name: 2. Set up Node.js 22
         uses: actions/setup-node@v4
@@ -47,167 +45,104 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: 3. Install Web dependencies
+      - name: 3. Install dependencies
         run: |
-          echo "Installing dependencies with legacy peer deps fallback..."
           npm install --legacy-peer-deps --no-audit --no-fund
 
-      - name: 4. Build Web App & Update Android Assets
+      - name: 4. Build Web Application
         run: |
-          echo "Building production Web application..."
           npm run build
-          echo "Cleaning stale assets..."
-          rm -rf app/src/main/assets/assets
-          rm -f app/src/main/assets/*.zip
-          rm -f dist/*.zip
-          echo "Syncing built bundle into Android assets..."
-          mkdir -p app/src/main/assets
-          cp -r dist/* app/src/main/assets/
-          rm -f app/src/main/assets/*.zip
 
-          # Safety check to prevent blank/black screen:
-          if [ ! -f "app/src/main/assets/index.html" ] || [ ! -s "app/src/main/assets/index.html" ]; then
-            echo "::error::CRITICAL: app/src/main/assets/index.html is missing or empty! This would cause a black screen."
-            exit 1
-          fi
-          echo "Assets verified successfully:"
-          ls -lh app/src/main/assets/
+      - name: 5. Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: amanguard-web-build
+          path: dist/
+          retention-days: 14
 
-      - name: 5. Set up Java JDK 17
+  build-android:
+    name: Build AmanGuard Android APKs (Child & Parent)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 2. Set up Java JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
-      - name: 6. Set up Android SDK & Accept Licenses
+      - name: 3. Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 4. Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: 5. Accept Android Licenses
         run: |
-          echo "Accepting Android SDK licenses..."
           yes | sdkmanager --licenses 2>/dev/null || true
 
-      - name: 7. Prepare Gradle wrapper
+      - name: 6. Build Child & Parent Debug APKs
         run: |
-          echo "Ensuring Linux line endings and executable permission on gradlew..."
-          sed -i -e 's/\r$//' ./gradlew
-          chmod +x ./gradlew
+          echo "Building Child & Parent APKs..."
+          gradle :child:assembleDebug :parent:assembleDebug --stacktrace --no-daemon
 
-      - name: 8. Verify Signing Keystore
+      - name: 7. Prepare APK Deliverables
         run: |
-          echo "Validating keystore..."
-          if [ -f app/sami-signing-key.p12 ]; then
-            echo "Universal signing key found at app/sami-signing-key.p12."
-            keytool -list -keystore app/sami-signing-key.p12 -storepass samitrading -storetype PKCS12 || echo "Keystore listed"
+          mkdir -p apk_output
+          
+          # Find and copy Child APK
+          CHILD_APK=$(find child/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          if [ -n "$CHILD_APK" ] && [ -f "$CHILD_APK" ]; then
+            cp "$CHILD_APK" apk_output/AmanGuard-Child.apk
+            echo "✅ Child APK ready: apk_output/AmanGuard-Child.apk"
           else
-            echo "Generating signing keystore..."
-            keytool -genkeypair -v \
-              -keystore app/sami-signing-key.p12 \
-              -storetype PKCS12 \
-              -storepass samitrading \
-              -keypass samitrading \
-              -alias sami \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -dname "CN=Sami Trading Challenge, OU=Mobile, O=Sami, L=Riyadh, ST=Riyadh, C=SA"
+            echo "⚠️ Child APK not found in default path"
           fi
 
-      - name: 9. Build Universal Signed Release APK with Gradle
-        env:
-          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=\"-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError\""
-        run: |
-          echo "Building single Universal Release APK..."
-          ./gradlew assembleRelease --no-daemon --stacktrace
-
-      - name: 10. Verify Generated Release APK and Prepare Single Deliverable
-        run: |
-          mkdir -p build_output_apk
-
-          RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
-
-          if [ -z "$RELEASE_APK" ] || [ ! -f "$RELEASE_APK" ]; then
-            echo "::error::Release APK was not generated in app/build/outputs/apk/release/!"
-            exit 1
+          # Find and copy Parent APK
+          PARENT_APK=$(find parent/build/outputs/apk/debug -name "*.apk" | head -n 1)
+          if [ -n "$PARENT_APK" ] && [ -f "$PARENT_APK" ]; then
+            cp "$PARENT_APK" apk_output/AmanGuard-Parent.apk
+            echo "✅ Parent APK ready: apk_output/AmanGuard-Parent.apk"
+          else
+            echo "⚠️ Parent APK not found in default path"
           fi
 
-          RELEASE_SIZE=$(stat -c%s "$RELEASE_APK" 2>/dev/null || stat -f%z "$RELEASE_APK")
-          RELEASE_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $RELEASE_SIZE / 1048576}")
-          echo "Found Release APK: $RELEASE_APK"
-          echo "Release APK size: $RELEASE_SIZE bytes (~$RELEASE_SIZE_MB MB)"
+          ls -lh apk_output/
 
-          if [ "$RELEASE_SIZE" -lt 5000000 ]; then
-            echo "::error::Release APK exists but is suspiciously small ($RELEASE_SIZE bytes)."
-            exit 1
-          fi
-
-          # Verify that index.html is actually inside the APK
-          if command -v unzip >/dev/null 2>&1; then
-            if unzip -l "$RELEASE_APK" | grep -q "assets/index.html"; then
-              echo "✅ Verified: assets/index.html is embedded inside APK."
-            else
-              echo "::error::assets/index.html was not found inside the generated APK!"
-              exit 1
-            fi
-          fi
-
-          # Copy as the single standardized APK
-          cp "$RELEASE_APK" build_output_apk/Sami-Android.apk
-          echo "Single deliverable created at build_output_apk/Sami-Android.apk"
-
-          # Verify that exactly one APK file exists in the directory
-          TOTAL_APKS=$(ls -1 build_output_apk/*.apk 2>/dev/null | wc -l)
-          if [ "$TOTAL_APKS" -ne 1 ]; then
-            echo "::error::Expected exactly 1 APK file in build_output_apk, but found $TOTAL_APKS"
-            exit 1
-          fi
-
-          echo "=========================================="
-          echo "SUCCESS: Single production APK ready:"
-          ls -lh build_output_apk/Sami-Android.apk
-          echo "=========================================="
-
-          # Output to GitHub Step Summary
-          if [ -n "$GITHUB_STEP_SUMMARY" ]; then
-            echo "### 🚀 Sami Android App Build Complete" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "- **Deliverable**: \`Sami-Android.apk\` (Single universal installable package)" >> $GITHUB_STEP_SUMMARY
-            echo "- **Package ID**: \`com.sami.tradingchallengetracker\`" >> $GITHUB_STEP_SUMMARY
-            echo "- **Version**: \`1.3.0\` (Build 11)" >> $GITHUB_STEP_SUMMARY
-            echo "- **Size**: \`${RELEASE_SIZE_MB} MB\`" >> $GITHUB_STEP_SUMMARY
-            echo "- **Target Architecture**: Universal (arm64-v8a, armeabi-v7a, x86, x86_64)" >> $GITHUB_STEP_SUMMARY
-            echo "- **Target Android**: Android 7.0+ (API 24 to 34)" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "✅ The APK is ready for direct installation on Android devices." >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: 11. Upload Single Release APK Artifact
+      - name: 8. Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Sami-Android-APK
-          path: build_output_apk/Sami-Android.apk
-          if-no-files-found: error
+          name: AmanGuard-Android-APKs
+          path: apk_output/
           retention-days: 30
-          overwrite: true
+          if-no-files-found: warn
 
-      - name: 12. Publish GitHub Release (Direct APK Download)
+      - name: 9. Publish GitHub Release with APKs
         if: (github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true') || startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         continue-on-error: true
         with:
-          tag_name: ${{ github.event.inputs.release_tag || github.ref_name || 'v1.3.0' }}
-          name: Sami Android App ${{ github.event.inputs.release_tag || github.ref_name || 'v1.3.0' }}
-          files: build_output_apk/Sami-Android.apk
+          tag_name: ${{ github.event.inputs.release_tag || github.ref_name || 'v1.2.0' }}
+          name: AmanGuard Family Release ${{ github.event.inputs.release_tag || github.ref_name || 'v1.2.0' }}
+          files: apk_output/*.apk
           draft: false
           prerelease: false
           body: |
-            ### 📱 تطبيق Sami Android - النسخة الرسمية الكاملة
-            - **اسم الملف:** `Sami-Android.apk`
-            - **معرف الحزمة:** `com.sami.tradingchallengetracker`
-            - **الإصدار:** `1.3.0` (Build 11)
-            - **الدعم:** معمارية شاملة لجميع هواتف Android (Universal APK)
+            ### 🛡️ منظومة أمان جارد للرقابة الأبوية - AmanGuard Family
             
-            #### طريقة التثبيت:
-            1. حمل ملف `Sami-Android.apk` مباشرة على هاتفك.
-            2. افتح الملف واضغط على **تثبيت** (Install).
-            3. يفتح التطبيق مباشرة في الواجهة الحقيقية بكامل البيانات وقاعدة البيانات.
+            #### 📦 حزم التطبيقات المتاحة للتحميل المباشر:
+            - **تطبيق الطفل:** `AmanGuard-Child.apk` (`com.amanguard.child`)
+              - تتبع الموقع الجغرافي الدقيق في الخلفية (GPS).
+              - حظر التطبيقات عبر إمكانية الوصول (`AccessibilityService`).
+              - قيود وقت الشاشة وجدول النوم.
+              - إقران فوري برمز QR أو رمز من 8 خانات.
+            - **تطبيق ولي الأمر:** `AmanGuard-Parent.apk` (`com.amanguard.parent`)
+              - متابعة مباشرة على الخريطة والمناطق الآمنة.
+              - إرسال الأوامر والتحكم الفوري.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
