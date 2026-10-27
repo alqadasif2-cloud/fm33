@@ -1,0 +1,114 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile of parent or family member",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "lang": { "type": "string" },
+        "fcmTokens": { "type": "array" }
+      }
+    },
+    "Family": {
+      "title": "Family",
+      "description": "Family group record managing connected devices",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "ownerUid": { "type": "string" },
+        "members": { "type": "array" },
+        "retentionDays": { "type": "number" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["name", "ownerUid", "members"]
+    },
+    "Device": {
+      "title": "Device",
+      "description": "Child device registered under a family",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "familyId": { "type": "string" },
+        "childName": { "type": "string" },
+        "name": { "type": "string" },
+        "avatarColor": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "pending", "disabled"] },
+        "deviceUid": { "type": "string" },
+        "fcmToken": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["childName", "name", "familyId"]
+    },
+    "LocationRecord": {
+      "title": "LocationRecord",
+      "description": "GPS coordinates and timestamp recorded by a child device",
+      "type": "object",
+      "properties": {
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "accuracy": { "type": "number" },
+        "provider": { "type": "string" },
+        "source": { "type": "string" },
+        "deviceTime": { "type": "number" },
+        "serverTime": { "type": "number" }
+      },
+      "required": ["lat", "lng", "deviceTime"]
+    },
+    "Geofence": {
+      "title": "Geofence",
+      "description": "Safe zone boundary configured by parents",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 60 },
+        "deviceId": { "type": "string" },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "radius": { "type": "number" }
+      },
+      "required": ["name", "deviceId", "lat", "lng", "radius"]
+    },
+    "AlertItem": {
+      "title": "AlertItem",
+      "description": "Security and geofence notifications",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "read": { "type": "boolean" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["type", "title", "body"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile documents"
+    },
+    "/families/{familyId}": {
+      "schema": "Family",
+      "description": "Family documents"
+    },
+    "/families/{familyId}/devices/{deviceId}": {
+      "schema": "Device",
+      "description": "Devices registered in a family"
+    },
+    "/families/{familyId}/devices/{deviceId}/locations/{locationId}": {
+      "schema": "LocationRecord",
+      "description": "Location breadcrumbs logged by a device"
+    },
+    "/families/{familyId}/geofences/{geofenceId}": {
+      "schema": "Geofence",
+      "description": "Geofenced safe zones"
+    },
+    "/families/{familyId}/alerts/{alertId}": {
+      "schema": "AlertItem",
+      "description": "Alert records for the family"
+    }
+  }
+}

@@ -19,25 +19,27 @@ service cloud.firestore {
 
     match /families/{fid} {
       allow read: if isMember(fid);
-      allow write: if false;                 // created/changed only by Cloud Functions
+      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid && request.auth.uid in request.resource.data.members;
+      allow update: if isMember(fid) && onlyKeys(['name', 'retentionDays', 'members']);
+      allow delete: if signedIn() && request.auth.uid == family(fid).ownerUid;
 
       match /devices/{did} {
         allow read: if isMember(fid) || (signedIn() && resource.data.deviceUid == request.auth.uid);
-        allow update: if (isMember(fid) && onlyKeys(['name', 'childName', 'avatar', 'settings']))
+        allow create: if isMember(fid);
+        allow update: if (isMember(fid) && onlyKeys(['name', 'childName', 'avatar', 'avatarColor', 'settings', 'status', 'deviceStatus', 'currentPermissions', 'lastLocation']))
                       || (signedIn() && resource.data.deviceUid == request.auth.uid && resource.data.status == 'active'
-                          && onlyKeys(['fcmToken', 'appVersion']));
-        allow create, delete: if false;
+                          && onlyKeys(['fcmToken', 'appVersion', 'deviceStatus', 'currentPermissions', 'lastLocation']));
+        allow delete: if isMember(fid);
 
-        match /status/{doc}      { allow read: if isMember(fid); allow write: if isDevice(fid, did); }
-        match /permissions/{doc} { allow read: if isMember(fid); allow write: if isDevice(fid, did); }
-        match /usage/{doc}       { allow read: if isMember(fid); allow write: if isDevice(fid, did); }
-        match /inventory/{doc}   { allow read: if isMember(fid); allow write: if isDevice(fid, did); }
+        match /status/{doc}      { allow read: if isMember(fid); allow write: if isDevice(fid, did) || isMember(fid); }
+        match /permissions/{doc} { allow read: if isMember(fid); allow write: if isDevice(fid, did) || isMember(fid); }
+        match /usage/{doc}       { allow read: if isMember(fid); allow write: if isDevice(fid, did) || isMember(fid); }
+        match /inventory/{doc}   { allow read: if isMember(fid); allow write: if isDevice(fid, did) || isMember(fid); }
         match /rules/{doc}       { allow read: if isMember(fid) || isDevice(fid, did); allow write: if isMember(fid); }
 
         match /locations/{id} {
           allow read, delete: if isMember(fid);
-          allow create: if isDevice(fid, did)
-            && request.resource.data.keys().hasOnly(['lat', 'lng', 'accuracy', 'provider', 'deviceTime', 'source', 'serverTime'])
+          allow create: if (isDevice(fid, did) || isMember(fid))
             && request.resource.data.lat is number && request.resource.data.lat >= -90 && request.resource.data.lat <= 90
             && request.resource.data.lng is number && request.resource.data.lng >= -180 && request.resource.data.lng <= 180;
           allow update: if false;
@@ -45,9 +47,9 @@ service cloud.firestore {
 
         match /commands/{id} {
           allow read: if isMember(fid) || isDevice(fid, did);
-          allow create, delete: if false;    // commands are created only by the sendCommand function
-          allow update: if isDevice(fid, did) && onlyKeys(['status', 'result', 'updatedAt'])
-            && request.resource.data.status in ['received', 'applied', 'failed', 'unsupported'];
+          allow create, delete: if isMember(fid);
+          allow update: if (isDevice(fid, did) || isMember(fid)) && onlyKeys(['status', 'result', 'updatedAt'])
+            && request.resource.data.status in ['sent', 'received', 'applied', 'failed', 'unsupported'];
         }
 
         match /liveSessions/{id} {
@@ -78,7 +80,7 @@ service cloud.firestore {
       match /alerts/{aid} {
         allow read, delete: if isMember(fid);
         allow update: if isMember(fid) && onlyKeys(['read']);
-        allow create: if false;
+        allow create: if isMember(fid);
       }
       match /auditEvents/{id} { allow read: if isMember(fid) && request.auth.uid == family(fid).ownerUid; allow write: if false; }
     }
