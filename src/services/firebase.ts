@@ -23,7 +23,20 @@ import {
   deleteDoc,
   serverTimestamp 
 } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
+
+// AmanGuard Firebase Project Configuration
+const firebaseConfig = {
+  projectId: "gen-lang-client-0469226875",
+  appId: "1:664521829167:web:67cc472af5321bd6d04fda",
+  apiKey: "AIzaSyBwf9n0PLEcwECAAEhtx4Q4yD_IBXh3NW4",
+  authDomain: "gen-lang-client-0469226875.firebaseapp.com",
+  firestoreDatabaseId: "ai-studio-amanguardfamily-48e3daaa-eaa0-4b57-a79d-0d7346263094",
+  storageBucket: "gen-lang-client-0469226875.firebasestorage.app",
+  messagingSenderId: "664521829167",
+  measurementId: "",
+  oAuthClientId: "664521829167-3drmu54hvrdulhjeepge1842a5qe7ih9.apps.googleusercontent.com",
+  recaptchaSiteKey: ""
+};
 
 // Initialize Firebase App
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
