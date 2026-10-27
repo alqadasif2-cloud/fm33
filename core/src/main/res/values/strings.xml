@@ -1,0 +1,46 @@
+<resources>
+    <string name="perm_location_fine_title">Precise location</string>
+    <string name="perm_location_fine_feature">Live location, location history, geofences</string>
+    <string name="perm_location_fine_reason">Reads this device\'s GPS/network coordinates and accuracy and sends them to your family\'s parent account. Without it no location can be shown.</string>
+    <string name="perm_location_bg_title">Location in the background</string>
+    <string name="perm_location_bg_feature">Periodic location while the app is closed</string>
+    <string name="perm_location_bg_reason">Allows periodic location updates when the app is not on screen. Android requires a separate step: choose \"Allow all the time\" in the settings page that opens.</string>
+    <string name="perm_location_services_title">Device location switch</string>
+    <string name="perm_location_services_feature">All location features</string>
+    <string name="perm_location_services_reason">The phone\'s Location setting must be on, otherwise Android returns no position even if the permission is granted.</string>
+    <string name="perm_notifications_title">Notifications</string>
+    <string name="perm_notifications_feature">Alerts and sync status notices</string>
+    <string name="perm_notifications_reason">Shows alerts (parent) and the visible notice while the app syncs (child device).</string>
+    <string name="perm_usage_title">Usage access</string>
+    <string name="perm_usage_feature">Screen time and app usage reports</string>
+    <string name="perm_usage_reason">Lets the app read how long each app was used (not its content). Enabled from a special Android settings page, not a normal dialog.</string>
+    <string name="perm_battery_title">Unrestricted battery use</string>
+    <string name="perm_battery_feature">Reliable background sync</string>
+    <string name="perm_battery_reason">Some phones stop background work to save battery. Allow the app to run in the background; some brands also need Auto-start enabled.</string>
+    <string name="perm_camera_title">Camera</string>
+    <string name="perm_camera_feature">Live camera stream to parent upon request</string>
+    <string name="perm_camera_reason">Allows streaming live front or rear camera video to parent dashboard, with a persistent notification on your phone.</string>
+    <string name="perm_mic_title">Microphone</string>
+    <string name="perm_mic_feature">Live ambient audio stream to parent upon request</string>
+    <string name="perm_mic_reason">Allows streaming live ambient microphone audio to parent dashboard upon on-demand request, with a persistent notification on your phone.</string>
+
+    <string name="state_granted">Granted</string>
+    <string name="state_denied">Denied</string>
+    <string name="state_not_requested">Not requested yet</string>
+    <string name="state_needs_manual">Needs manual setup</string>
+    <string name="state_partial">Partially enabled</string>
+    <string name="state_unavailable">Unavailable on this device</string>
+    <string name="state_revoked">Revoked after being granted</string>
+    <string name="state_needs_reauth">Needs new system approval</string>
+
+    <string name="action_enable">Enable</string>
+    <string name="action_fix">Fix</string>
+    <string name="action_next">Next</string>
+    <string name="action_skip">Skip for now</string>
+    <string name="action_recheck">Re-check</string>
+    <string name="wizard_title">Setup (%1$d of %2$d)</string>
+    <string name="wizard_feature">Used by: %1$s</string>
+    <string name="wizard_skip_warning">If skipped, this will not work: %1$s</string>
+    <string name="status_last_checked">Last checked: %1$s</string>
+    <string name="status_title">Permissions status</string>
+</resources>

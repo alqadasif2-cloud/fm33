@@ -1,0 +1,46 @@
+<resources>
+    <string name="perm_location_fine_title">الموقع الدقيق</string>
+    <string name="perm_location_fine_feature">الموقع المباشر وسجل المواقع والمناطق الجغرافية</string>
+    <string name="perm_location_fine_reason">يقرأ إحداثيات الجهاز (GPS/الشبكة) ودقتها ويرسلها إلى حساب ولي الأمر في عائلتك. بدونه لا يمكن عرض أي موقع.</string>
+    <string name="perm_location_bg_title">الموقع في الخلفية</string>
+    <string name="perm_location_bg_feature">تحديث الموقع دوريًا والتطبيق مغلق</string>
+    <string name="perm_location_bg_reason">يسمح بتحديث الموقع عندما لا يكون التطبيق على الشاشة. يتطلب Android خطوة منفصلة: اختر «السماح طوال الوقت» في صفحة الإعدادات التي ستفتح.</string>
+    <string name="perm_location_services_title">مفتاح الموقع في الهاتف</string>
+    <string name="perm_location_services_feature">جميع وظائف الموقع</string>
+    <string name="perm_location_services_reason">يجب تفعيل إعداد الموقع في الهاتف، وإلا لن يعيد Android أي موقع حتى لو مُنح الإذن.</string>
+    <string name="perm_notifications_title">الإشعارات</string>
+    <string name="perm_notifications_feature">التنبيهات وإشعار حالة المزامنة</string>
+    <string name="perm_notifications_reason">لإظهار التنبيهات (ولي الأمر) والإشعار الظاهر أثناء المزامنة (جهاز الطفل).</string>
+    <string name="perm_usage_title">الوصول إلى إحصاءات الاستخدام</string>
+    <string name="perm_usage_feature">تقارير وقت الشاشة واستخدام التطبيقات</string>
+    <string name="perm_usage_reason">يتيح قراءة مدة استخدام كل تطبيق (وليس محتواه). يُفعّل من صفحة إعدادات خاصة في Android وليس من نافذة السماح المعتادة.</string>
+    <string name="perm_battery_title">استخدام البطارية دون قيود</string>
+    <string name="perm_battery_feature">مزامنة موثوقة في الخلفية</string>
+    <string name="perm_battery_reason">بعض الهواتف توقف العمل في الخلفية لتوفير البطارية. اسمح للتطبيق بالعمل في الخلفية، وبعض الشركات تتطلب أيضًا تفعيل التشغيل التلقائي.</string>
+    <string name="perm_camera_title">الكاميرا</string>
+    <string name="perm_camera_feature">بث الكاميرا المباشر لولي الأمر عند الطلب</string>
+    <string name="perm_camera_reason">يتيح فتح بث مباشر للكاميرا الأمامية أو الخلفية عند طلب ولي الأمر من لوحة التحكم، مع ظهور إشعار دائم على جهازك.</string>
+    <string name="perm_mic_title">الميكروفون</string>
+    <string name="perm_mic_feature">بث الصوت المباشر لولي الأمر عند الطلب</string>
+    <string name="perm_mic_reason">يتيح الاستماع للبث الصوتي المباشر عند طلب ولي الأمر، مع ظهور إشعار دائم وواضح على جهازك.</string>
+
+    <string name="state_granted">ممنوحة</string>
+    <string name="state_denied">مرفوضة</string>
+    <string name="state_not_requested">لم تُطلب بعد</string>
+    <string name="state_needs_manual">تحتاج إلى إعداد يدوي</string>
+    <string name="state_partial">مفعلة جزئيًا</string>
+    <string name="state_unavailable">غير متاحة على الجهاز</string>
+    <string name="state_revoked">أُلغيت بعد أن كانت ممنوحة</string>
+    <string name="state_needs_reauth">تحتاج إلى موافقة نظامية جديدة</string>
+
+    <string name="action_enable">تفعيل</string>
+    <string name="action_fix">إصلاح</string>
+    <string name="action_next">التالي</string>
+    <string name="action_skip">تخطي الآن</string>
+    <string name="action_recheck">إعادة الفحص</string>
+    <string name="wizard_title">الإعداد (%1$d من %2$d)</string>
+    <string name="wizard_feature">تُستخدم في: %1$s</string>
+    <string name="wizard_skip_warning">عند التخطي لن يعمل: %1$s</string>
+    <string name="status_last_checked">آخر فحص: %1$s</string>
+    <string name="status_title">حالة الصلاحيات</string>
+</resources>

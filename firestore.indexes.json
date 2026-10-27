@@ -1,0 +1,11 @@
+{
+  "indexes": [
+    { "collectionGroup": "commands", "queryScope": "COLLECTION",
+      "fields": [ { "fieldPath": "type", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "ASCENDING" } ] }
+  ],
+  "fieldOverrides": [
+    { "collectionGroup": "devices", "fieldPath": "status", "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" } ] }
+  ]
+}

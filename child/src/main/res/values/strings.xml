@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">AmanGuard Child</string>
+    <string name="pair_title">Link this device</string>
+    <string name="pair_hint">Enter the 8-character code shown in the parent app</string>
+    <string name="pair_scan">Scan QR</string>
+    <string name="pair_check">Check code</string>
+    <string name="pair_confirm">Link to %1$s</string>
+    <string name="pair_found">Family: %1$s\nChild profile: %2$s\n\nThis device will share the data you enable (location, app usage) with this family\'s parents. A visible notice is shown whenever the app syncs.</string>
+    <string name="home_linked">Linked to family: %1$s</string>
+    <string name="home_last_sync">Last sync: %1$s</string>
+    <string name="home_never">No sync completed yet</string>
+    <string name="home_active">Active features</string>
+    <string name="home_feat_location">Location every 15 minutes (needs location permissions)</string>
+    <string name="home_feat_usage">App usage report (needs usage access)</string>
+    <string name="home_no_live">Live screen, camera and audio sessions operate on-demand upon authorized parent request with system notices.</string>
+    <string name="home_unlink">Unlink this device</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_perms">Permissions</string>
+    <string name="notif_channel">Sync status</string>
+    <string name="notif_syncing">AmanGuard is syncing with your family</string>
+    <string name="err_generic">Failed: %1$s</string>
+    <string name="accessibility_service_desc">AmanGuard Accessibility Service is used to enforce app blocking and bedtime schedules set by parents.</string>
+    <string name="app_blocked_title">App Restricted</string>
+    <string name="app_blocked_reason_rule">This app is restricted by parent rules.</string>
+    <string name="app_blocked_reason_bedtime">Bedtime schedule is active. Entertainment apps are currently restricted.</string>
+    <string name="app_blocked_reason_limit">You have reached the daily screen time limit for this app.</string>
+    <string name="go_home">Go to Home Screen</string>
+</resources>

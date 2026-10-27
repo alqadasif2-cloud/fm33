@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">أمان جارد – الطفل</string>
+    <string name="pair_title">ربط هذا الجهاز</string>
+    <string name="pair_hint">أدخل الرمز المكوّن من 8 خانات الظاهر في تطبيق ولي الأمر</string>
+    <string name="pair_scan">مسح QR</string>
+    <string name="pair_check">التحقق من الرمز</string>
+    <string name="pair_confirm">الربط بعائلة %1$s</string>
+    <string name="pair_found">العائلة: %1$s\nملف الطفل: %2$s\n\nسيشارك هذا الجهاز البيانات التي تفعّلها (الموقع، استخدام التطبيقات) مع أولياء أمور هذه العائلة. يظهر إشعار واضح كلما تمت المزامنة.</string>
+    <string name="home_linked">مرتبط بعائلة: %1$s</string>
+    <string name="home_last_sync">آخر مزامنة: %1$s</string>
+    <string name="home_never">لم تكتمل أي مزامنة بعد</string>
+    <string name="home_active">الوظائف النشطة</string>
+    <string name="home_feat_location">الموقع كل 15 دقيقة (يتطلب صلاحيات الموقع)</string>
+    <string name="home_feat_usage">تقرير استخدام التطبيقات (يتطلب إذن الاستخدام)</string>
+    <string name="home_no_live">جلسات البث المباشر (الشاشة، الكاميرا، الصوت) متاحة وتعمل عند طلب ولي الأمر المخوّل مع إشعار نظام ظاهر.</string>
+    <string name="home_unlink">إلغاء ربط هذا الجهاز</string>
+    <string name="tab_home">الرئيسية</string>
+    <string name="tab_perms">الصلاحيات</string>
+    <string name="notif_channel">حالة المزامنة</string>
+    <string name="notif_syncing">أمان جارد يزامن البيانات مع عائلتك</string>
+    <string name="err_generic">فشل: %1$s</string>
+    <string name="accessibility_service_desc">تُستخدم خدمة إمكانية الوصول في أمان جارد لتنفيذ حظر التطبيقات وفرض جدول وقت الشاشة المحدد من قبل ولي الأمر.</string>
+    <string name="app_blocked_title">هذا التطبيق مقيّد</string>
+    <string name="app_blocked_reason_rule">تم حظر هذا التطبيق من قبل ولي الأمر وفقاً لقواعد العائلة.</string>
+    <string name="app_blocked_reason_bedtime">حان وقت النوم والراحة. التطبيقات الترفيهية مقيّدة حالياً.</string>
+    <string name="app_blocked_reason_limit">لقد وصلت للحد الأقصى المسموح به لاستخدام هذا التطبيق اليوم.</string>
+    <string name="go_home">العودة للشاشة الرئيسية</string>
+</resources>

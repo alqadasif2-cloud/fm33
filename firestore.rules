@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function family(fid) { return get(/databases/$(database)/documents/families/$(fid)).data; }
+    function isMember(fid) { return signedIn() && request.auth.uid in family(fid).members; }
+    function device(fid, did) { return get(/databases/$(database)/documents/families/$(fid)/devices/$(did)).data; }
+    function isDevice(fid, did) { return signedIn() && device(fid, did).deviceUid == request.auth.uid && device(fid, did).status == 'active'; }
+    function onlyKeys(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+
+    // Server-only collections
+    match /pairingCodes/{id} { allow read, write: if false; }
+    match /rateLimits/{id}   { allow read, write: if false; }
+
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow update: if signedIn() && request.auth.uid == uid && onlyKeys(['fcmTokens', 'displayName', 'lang']);
+    }
+
+    match /families/{fid} {
+      allow read: if isMember(fid);
+      allow write: if false;                 // created/changed only by Cloud Functions
+
+      match /devices/{did} {
+        allow read: if isMember(fid) || (signedIn() && resource.data.deviceUid == request.auth.uid);
+        allow update: if (isMember(fid) && onlyKeys(['name', 'childName', 'avatar', 'settings']))
+                      || (signedIn() && resource.data.deviceUid == request.auth.uid && resource.data.status == 'active'
+                          && onlyKeys(['fcmToken', 'appVersion']));
+        allow create, delete: if false;
+
+        match /status/{doc}      { allow read: if isMember(fid); allow write: if isDevice(fid, did); }
+        match /permissions/{doc} { allow read: if isMember(fid); allow write: if isDevice(fid, did); }
+        match /usage/{doc}       { allow read: if isMember(fid); allow write: if isDevice(fid, did); }
+        match /inventory/{doc}   { allow read: if isMember(fid); allow write: if isDevice(fid, did); }
+        match /rules/{doc}       { allow read: if isMember(fid) || isDevice(fid, did); allow write: if isMember(fid); }
+
+        match /locations/{id} {
+          allow read, delete: if isMember(fid);
+          allow create: if isDevice(fid, did)
+            && request.resource.data.keys().hasOnly(['lat', 'lng', 'accuracy', 'provider', 'deviceTime', 'source', 'serverTime'])
+            && request.resource.data.lat is number && request.resource.data.lat >= -90 && request.resource.data.lat <= 90
+            && request.resource.data.lng is number && request.resource.data.lng >= -180 && request.resource.data.lng <= 180;
+          allow update: if false;
+        }
+
+        match /commands/{id} {
+          allow read: if isMember(fid) || isDevice(fid, did);
+          allow create, delete: if false;    // commands are created only by the sendCommand function
+          allow update: if isDevice(fid, did) && onlyKeys(['status', 'result', 'updatedAt'])
+            && request.resource.data.status in ['received', 'applied', 'failed', 'unsupported'];
+        }
+
+        match /liveSessions/{id} {
+          allow read: if isMember(fid) || isDevice(fid, did);
+          allow create: if isMember(fid)
+            && request.resource.data.type in ['screen', 'camera_front', 'camera_back', 'mic']
+            && request.resource.data.status in ['requested', 'connecting'];
+          allow update: if (isMember(fid) && onlyKeys(['status', 'endedAt', 'failureReason', 'offerSdp']))
+                        || (isDevice(fid, did) && onlyKeys(['status', 'startedAt', 'endedAt', 'failureReason', 'answerSdp', 'updatedAt']));
+          allow delete: if isMember(fid);
+
+          match /signals/{sid} {
+            allow read, write: if isMember(fid) || isDevice(fid, did);
+          }
+        }
+
+      match /geofences/{gid} {
+        allow read: if isMember(fid);
+        allow create, update: if isMember(fid)
+          && request.resource.data.name is string && request.resource.data.name.size() <= 60
+          && request.resource.data.radius is number && request.resource.data.radius >= 50 && request.resource.data.radius <= 5000
+          && request.resource.data.lat is number && request.resource.data.lng is number
+          && request.resource.data.deviceId is string;
+        allow delete: if isMember(fid);
+      }
+      match /geofenceState/{id} { allow read: if isMember(fid); allow write: if false; }
+
+      match /alerts/{aid} {
+        allow read, delete: if isMember(fid);
+        allow update: if isMember(fid) && onlyKeys(['read']);
+        allow create: if false;
+      }
+      match /auditEvents/{id} { allow read: if isMember(fid) && request.auth.uid == family(fid).ownerUid; allow write: if false; }
+    }
+  }
+}
